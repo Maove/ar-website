@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  web:
+    depends_on:
+      - db
+    build: .
+    ports:
+      - "8080:80"
+    networks:
+      - internal
+    environment:
+      - JOOMLA_DB_HOST=db
+      - MYSQL_PORT_3306_TCP=3306
+      - JOOMLA_DB_USER=root
+      - JOOMLA_DB_PASSWORD=${{ secrets.JOOMLA_DB_PASSWORD }}
+      - JOOMLA_DB_NAME=joomla
+  db:
+    image: mariadb:latest
+    ports:
+      - "3306:3306" 
+    environment:
+      - MARIADB_ROOT_PASSWORD=${{ secrets.JOOMLA_DB_PASSWORD }}
+    networks:
+      - internal
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ${{ secrets.JOOMLA_DB_PASSWORD }}
+    ports:
+      - "8081:80"
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
